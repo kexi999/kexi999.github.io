@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
-    <link>https://example.org/</link>
-    <description>Recent content from My New Hugo Site</description>
+    <title>念头通达的博客</title>
+    <link>https://kexi999.github.io/</link>
+    <description>Recent content from 念头通达的博客</description>
     <generator>Hugo</generator>
-    <language>en-us</language>
+    <language>zh-CN</language>
     
-    <managingEditor>xxx@example.com (D-Sketon)</managingEditor>
-    <webMaster>xxx@example.com (D-Sketon)</webMaster>
+    <managingEditor>https://kexi999.github.io/ (念头通达)</managingEditor>
+    <webMaster>https://kexi999.github.io/ (念头通达)</webMaster>
     
     <copyright>All articles on this blog are licensed under the BY-NC-SA license agreement unless otherwise stated. Please indicate the source when reprinting!</copyright>
     
     <lastBuildDate>Sat, 08 Nov 2025 20:36:10 +0800</lastBuildDate>
     
     
-    <atom:link href="https://example.org/index.xml" rel="self" type="application/rss&#43;xml" />
+    <atom:link href="https://kexi999.github.io/index.xml" rel="self" type="application/rss&#43;xml" />
     
 
     
@@ -23,16 +23,16 @@
 
     <item>
       <title>My Second Post</title>
-      <link>https://example.org/post/my-second-post/</link>
+      <link>https://kexi999.github.io/post/my-second-post/</link>
       <pubDate>Sat, 08 Nov 2025 20:36:10 &#43;0800</pubDate>
-      <author>xxx@example.com (D-Sketon)</author>
-      <guid>https://example.org/post/my-second-post/</guid>
+      <author>https://kexi999.github.io/ (念头通达)</author>
+      <guid>https://kexi999.github.io/post/my-second-post/</guid>
       <description>
-        <![CDATA[<h1>My Second Post</h1><p>Author: D-Sketon(xxx@example.com)</p>
+        <![CDATA[<h1>My Second Post</h1><p>Author: 念头通达(https://kexi999.github.io/)</p>
         
           <p>My Second Post</p>
         
-        <hr><p>Published on 2025-11-08 at <a href='https://example.org/'>My New Hugo Site</a>, last modified on 2025-11-08</p>]]>
+        <hr><p>Published on 2025-11-08 at <a href='https://kexi999.github.io/'>念头通达的博客</a>, last modified on 2025-11-08</p>]]>
       </description>
       
         <category></category>
@@ -43,16 +43,16 @@
 
     <item>
       <title>Hello World</title>
-      <link>https://example.org/post/hello/</link>
+      <link>https://kexi999.github.io/post/hello/</link>
       <pubDate>Wed, 15 Mar 2023 11:00:00 -0700</pubDate>
-      <author>xxx@example.com (D-Sketon)</author>
-      <guid>https://example.org/post/hello/</guid>
+      <author>https://kexi999.github.io/ (念头通达)</author>
+      <guid>https://kexi999.github.io/post/hello/</guid>
       <description>
-        <![CDATA[<h1>Hello World</h1><p>Author: D-Sketon(xxx@example.com)</p>
+        <![CDATA[<h1>Hello World</h1><p>Author: 念头通达(https://kexi999.github.io/)</p>
         
-          <p>💘 博麗 霊夢 💘</p>
+          <p>念头通达</p>
         
-        <hr><p>Published on 2023-03-15 at <a href='https://example.org/'>My New Hugo Site</a>, last modified on 2023-03-15</p>]]>
+        <hr><p>Published on 2023-03-15 at <a href='https://kexi999.github.io/'>念头通达的博客</a>, last modified on 2023-03-15</p>]]>
       </description>
       
     </item>
