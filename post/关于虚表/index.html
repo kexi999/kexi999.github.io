@@ -146,11 +146,8 @@ This article does not have a corresponding language version
 <div class="sidebar-toc-wrapper toc-div-class">
   <nav id="TableOfContents">
   <ul>
-    <li>
-      <ul>
-        <li><a href="#一虚表虚函数表的核心概念">一、虚表（虚函数表）的核心概念</a></li>
-      </ul>
-    </li>
+    <li><a href="#核心定义">核心定义</a></li>
+    <li><a href="#核心组成">核心组成</a></li>
   </ul>
 </nav>
 </div></div>
@@ -246,14 +243,26 @@ This article does not have a corresponding language version
       >C&#43;&#43;学习历程</a
     ></div>
 </div><div class="hr-line"></div><div class="e-content article-entry" itemprop="articleBody"><p>关于虚表</p>
-<h3 id="一虚表虚函数表的核心概念">
-<a class="header-anchor" href="#%e4%b8%80%e8%99%9a%e8%a1%a8%e8%99%9a%e5%87%bd%e6%95%b0%e8%a1%a8%e7%9a%84%e6%a0%b8%e5%bf%83%e6%a6%82%e5%bf%b5"></a>
-一、虚表（虚函数表）的核心概念
-</h3><p>在 C++ 中，虚表（Virtual Table，简称 VTable）是实现<strong>动态绑定（多态）</strong> 的底层核心机制。当一个类声明了虚函数（包括继承自父类的虚函数），编译器会为该类生成一个唯一的虚表：</p>
+<h1 id="一什么是虚表">
+<a class="header-anchor" href="#%e4%b8%80%e4%bb%80%e4%b9%88%e6%98%af%e8%99%9a%e8%a1%a8"></a>
+一、什么是虚表
+</h1><h2 id="核心定义">
+<a class="header-anchor" href="#%e6%a0%b8%e5%bf%83%e5%ae%9a%e4%b9%89"></a>
+核心定义
+</h2><p>虚表（Virtual Table，简称 <strong>VTable</strong>）是 C++ 实现<strong>动态绑定（多态）<strong>的</strong>底层核心机制</strong>，由编译器<strong>自动生成和维护</strong>，无需手动编写。</p>
 <ul>
-<li>虚表本质是一个存储<strong>虚函数指针</strong>的数组，按虚函数声明的顺序存放函数地址；</li>
-<li>每个包含虚函数的类的对象，都会隐式包含一个 <code>vptr</code>（虚表指针），该指针指向所属类的虚表。</li>
-</ul></div>
+<li>本质：一个<strong>常量指针数组</strong>，数组中存储的是当前类所有<strong>虚函数的内存地址</strong>；</li>
+<li>虚表指针（vptr）：编译器会为包含虚函数的类，自动在对象中插入一个隐藏的指针，指向类的虚表；</li>
+<li>绑定特性：虚表解决了<strong>编译期无法确定函数调用目标</strong>的问题，将函数调用决议推迟到<strong>运行期</strong>（动态绑定）。</li>
+</ul>
+<h2 id="核心组成">
+<a class="header-anchor" href="#%e6%a0%b8%e5%bf%83%e7%bb%84%e6%88%90"></a>
+核心组成
+</h2><ol>
+<li><strong>虚函数表（VTable）</strong>：类级别，所有同类对象共享同一张虚表，存储虚函数地址；</li>
+<li><strong>虚表指针（vptr）</strong>：对象级别，每个对象都拥有，指向所属类的虚表。</li>
+</ol>
+<hr></div>
     <footer class="article-footer"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in">
       <a
         class="article-tag-list-link"
@@ -315,7 +324,7 @@ This article does not have a corresponding language version
         >
       </div><div>
         <span class="icon-brush"
-          >&nbsp;15</span
+          >&nbsp;18</span
         >
         &nbsp;|&nbsp;
         <span class="icon-coffee">&nbsp;00:03</span>
@@ -344,11 +353,8 @@ This article does not have a corresponding language version
 <div class="sidebar-toc-wrapper toc-div-class">
   <nav id="TableOfContents">
   <ul>
-    <li>
-      <ul>
-        <li><a href="#一虚表虚函数表的核心概念">一、虚表（虚函数表）的核心概念</a></li>
-      </ul>
-    </li>
+    <li><a href="#核心定义">核心定义</a></li>
+    <li><a href="#核心组成">核心组成</a></li>
   </ul>
 </nav>
 </div></div>
