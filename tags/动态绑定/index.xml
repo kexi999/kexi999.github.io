@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>动态绑定 on 念头通达的博客</title>
+    <link>https://kexi999.github.io/tags/%E5%8A%A8%E6%80%81%E7%BB%91%E5%AE%9A/</link>
+    <description>Recent content from 念头通达的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    <managingEditor>https://kexi999.github.io/ (念头通达)</managingEditor>
+    <webMaster>https://kexi999.github.io/ (念头通达)</webMaster>
+    
+    <copyright>All articles on this blog are licensed under the BY-NC-SA license agreement unless otherwise stated. Please indicate the source when reprinting!</copyright>
+    
+    <lastBuildDate>Wed, 25 Mar 2026 15:27:06 +0800</lastBuildDate>
+    
+    
+    <atom:link href="https://kexi999.github.io/tags/%E5%8A%A8%E6%80%81%E7%BB%91%E5%AE%9A/index.xml" rel="self" type="application/rss&#43;xml" />
+    
+
+    
+    
+
+    <item>
+      <title>关于虚表</title>
+      <link>https://kexi999.github.io/post/%E5%85%B3%E4%BA%8E%E8%99%9A%E8%A1%A8/</link>
+      <pubDate>Wed, 25 Mar 2026 15:27:06 &#43;0800</pubDate>
+      <author>https://kexi999.github.io/ (念头通达)</author>
+      <guid>https://kexi999.github.io/post/%E5%85%B3%E4%BA%8E%E8%99%9A%E8%A1%A8/</guid>
+      <description>
+        <![CDATA[<h1>关于虚表</h1><p>Author: 念头通达(https://kexi999.github.io/)</p>
+        
+          <p>关于虚表</p>
+        
+        <hr><p>Published on 2026-03-25 at <a href='https://kexi999.github.io/'>念头通达的博客</a>, last modified on 2026-03-25</p>]]>
+      </description>
+      
+        <category>C&#43;&#43;学习历程</category>
+      
+    </item>
+    
+  </channel>
+</rss>
