@@ -11,7 +11,7 @@
   关于虚表 | 念头通达
 </title>
 <meta name="description" content="关于虚表"/>
-    <meta name="keywords" content="关于虚表" /><script>
+    <meta name="keywords" content="虚表" /><script>
   window.siteConfig = JSON.parse("{\"anchor_icon\":null,\"base\":\"https://kexi999.github.io/\",\"clipboard\":{\"copyright\":{\"count\":50,\"enable\":false,\"license_type\":\"by-nc-sa\"},\"fail\":{\"en\":\"Copy failed (ﾟ⊿ﾟ)ﾂ\",\"ja\":\"コピー失敗 (ﾟ⊿ﾟ)ﾂ\",\"pt-br\":\"Falha ao copiar (ﾟ⊿ﾟ)ﾂ\",\"zh-cn\":\"复制失败 (ﾟ⊿ﾟ)ﾂ\",\"zh-tw\":\"複製失敗 (ﾟ⊿ﾟ)ﾂ\"},\"success\":{\"en\":\"Copy successfully (*^▽^*)\",\"ja\":\"コピー成功 (*^▽^*)\",\"pt-br\":\"Copiado com sucesso (*^▽^*)\",\"zh-cn\":\"复制成功 (*^▽^*)\",\"zh-tw\":\"複製成功 (*^▽^*)\"}},\"code_block\":{\"expand\":true},\"icon_font\":\"4552607_4k4bc36ef96\",\"outdate\":{\"daysago\":180,\"enable\":false,\"message\":{\"en\":\"This article was last updated on {time}. Please note that the content may no longer be applicable.\",\"ja\":\"この記事は最終更新日：{time}。記載内容が現在有効でない可能性がありますのでご注意ください。\",\"pt-br\":\"Este artigo foi atualizado pela última vez em {time}. Observe que o conteúdo pode não ser mais aplicável.\",\"zh-cn\":\"本文最后更新于 {time}，请注意文中内容可能已不适用。\",\"zh-tw\":\"本文最後更新於 {time}，請注意文中內容可能已不適用。\"}}}");
   
 </script>
@@ -249,10 +249,11 @@ This article does not have a corresponding language version
 </h1><h2 id="核心定义">
 <a class="header-anchor" href="#%e6%a0%b8%e5%bf%83%e5%ae%9a%e4%b9%89"></a>
 核心定义
-</h2><p>虚表（Virtual Table，简称 <strong>VTable</strong>）是 C++ 实现<strong>动态绑定（多态）<strong>的</strong>底层核心机制</strong>，由编译器<strong>自动生成和维护</strong>，无需手动编写。</p>
+</h2><pre><code>虚表（`Virtual Table`，简称 **VTable**）是 C++ 实现**动态绑定（多态）**的**底层核心机制**，由编译器**自动生成和维护**，无需手动编写。
+</code></pre>
 <ul>
 <li>本质：一个<strong>常量指针数组</strong>，数组中存储的是当前类所有<strong>虚函数的内存地址</strong>；</li>
-<li>虚表指针（vptr）：编译器会为包含虚函数的类，自动在对象中插入一个隐藏的指针，指向类的虚表；</li>
+<li>虚表指针（<code>vptr</code>）：编译器会为包含虚函数的类，自动在对象中插入一个隐藏的指针，指向类的虚表；</li>
 <li>绑定特性：虚表解决了<strong>编译期无法确定函数调用目标</strong>的问题，将函数调用决议推迟到<strong>运行期</strong>（动态绑定）。</li>
 </ul>
 <h2 id="核心组成">
@@ -261,8 +262,7 @@ This article does not have a corresponding language version
 </h2><ol>
 <li><strong>虚函数表（VTable）</strong>：类级别，所有同类对象共享同一张虚表，存储虚函数地址；</li>
 <li><strong>虚表指针（vptr）</strong>：对象级别，每个对象都拥有，指向所属类的虚表。</li>
-</ol>
-<hr></div>
+</ol></div>
     <footer class="article-footer"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in">
       <a
         class="article-tag-list-link"
@@ -291,7 +291,7 @@ This article does not have a corresponding language version
     aria-label="Article navigation"
     data-aos="fade-up"
   ><div class="article-nav-link-wrap left"><img
-              data-src="cover/12.webp"
+              data-src="cover/7.webp"
               data-sizes="auto"
               alt="My Second Post"
               class="lazyload"
@@ -324,7 +324,7 @@ This article does not have a corresponding language version
         >
       </div><div>
         <span class="icon-brush"
-          >&nbsp;18</span
+          >&nbsp;19</span
         >
         &nbsp;|&nbsp;
         <span class="icon-coffee">&nbsp;00:03</span>
