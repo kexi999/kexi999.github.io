@@ -243,11 +243,11 @@ This article does not have a corresponding language version
       >C&#43;&#43;学习历程</a
     ></div>
 </div><div class="hr-line"></div><div class="e-content article-entry" itemprop="articleBody"><p><strong>C++的妙妙赋值法</strong></p>
-<p>在学习C++的过程中，一直认为编写结构体并对其进行赋值是一件麻烦的事，要进行又臭又长的代码编写，直至后来了解到一种方法，让赋值变得简单又直接，不用再使用很长的<code>cout</code>语句进行赋值</p>
+<p>在学习C++的过程中，一直认为编写结构体并对其进行赋值是一件麻烦的事，要进行又臭又长的代码编写，直至后来了解到一种方法，让赋值变得简单又直接，不用再使用很长的<code>cout</code>语句进行赋值。</p>
 <h2 id="拼接赋值法">
 <a class="header-anchor" href="#%e6%8b%bc%e6%8e%a5%e8%b5%8b%e5%80%bc%e6%b3%95"></a>
 拼接赋值法
-</h2><p>比如在对结构体数组中的字符串进行赋值时，类似student_a，student_b，之类的赋值时，在我未<code>&quot;开智&quot;</code>之前，通常使用定义的方式进行赋值</p>
+</h2><p>比如在对结构体数组中的字符串进行赋值时，类似student_a，student_b，之类的赋值时，在我未<code>&quot;开智&quot;</code>之前，通常使用定义的方式进行赋值。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;iostream&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;string&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
@@ -272,8 +272,8 @@ This article does not have a corresponding language version
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">system(&#34;pause&#34;);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">return 0;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
-</span></span></span></code></pre></div><p>以这样的方式进行赋值确实有失水准，数据小一点还好，数据量大起来代码就很难看了，那么前面忘记了，总之有的兄弟，有的
-可以通过使用for循环进行轮赋值，采取字符串拼接的方式进行。如可以将两个字符串进行前后拼接，如将字符串&quot;student_&ldquo;与字符&quot;a&quot;进行拼接，使得拼成字符串&quot;stdent_a&rdquo;。可以先将结构体中的&quot;name&quot;变量全部赋值&quot;stdent_&quot;，然后创建一个字符串数组，里面装有从&quot;a&quot;到&quot;f&quot;六个字母，用for循环拼接字符串的方式进行名字赋值</p>
+</span></span></span></code></pre></div><p>以这样的方式进行赋值确实有失水准，数据小一点还好，数据量大起来代码就很难看了，那么前面忘记了，总之有的兄弟，有的。
+可以通过使用for循环进行轮赋值，采取字符串拼接的方式进行。如可以将两个字符串进行前后拼接，如将字符串&quot;student_&ldquo;与字符&quot;a&quot;进行拼接，使得拼成字符串&quot;stdent_a&rdquo;。可以先将结构体中的&quot;name&quot;变量全部赋值&quot;stdent_&quot;，然后创建一个字符串数组，里面装有从&quot;a&quot;到&quot;f&quot;六个字母，用for循环拼接字符串的方式进行名字赋值。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;iostream&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;string&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">struct student</span><span class="w">
@@ -294,7 +294,7 @@ This article does not have a corresponding language version
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">systam(&#34;pause&#34;);</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">return 0;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
-</span></span></span></code></pre></div><p>由此拓展，是不是也可以将姓氏与名字分别存放，通过for循环的方式进行拼接以组成名字，甚至可以通过引入<code>&lt;ctime&gt;</code>库进行以时间为随机种子，进行姓名的随机搭配</p>
+</span></span></span></code></pre></div><p>由此拓展，是不是也可以将姓氏与名字分别存放，通过for循环的方式进行拼接以组成名字，甚至可以通过引入<code>&lt;ctime&gt;</code>库进行以时间为随机种子，进行姓名的随机搭配。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;iostream&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;string&gt;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;ctime&gt;   </span><span class="w">
@@ -328,8 +328,8 @@ This article does not have a corresponding language version
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">return 0;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">\\以上所有姓氏与名字表中的数据均由ai生成</span><span class="w">
-</span></span></span></code></pre></div><p>还可以将生成的名字导入到外部文件中，此处不再展示
-以上就是在C++的学习中学到的妙妙赋值法，极大程度上的减少了以定义法赋值的代码长度</p></div>
+</span></span></span></code></pre></div><p>还可以将生成的名字导入到外部文件中，此处不再展示。
+以上就是在C++的学习中学到的妙妙赋值法，极大程度上的减少了以定义法赋值的代码长度。</p></div>
     <footer class="article-footer"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in">
       <a
         class="article-tag-list-link"
