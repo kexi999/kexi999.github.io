@@ -164,17 +164,17 @@ This article does not have a corresponding language version
 </div>
 <div class="sidebar-state">
   <div class="sidebar-state-article">
-    <div>Posts</div><div class="sidebar-state-number">4</div>
+    <div>Posts</div><div class="sidebar-state-number">5</div>
   </div>
   <a class="sidebar-state-category" href="/categories/" aria-label="sidebar-state-category-link">
     <div>Categories</div>
     <div class="sidebar-state-number">
-      1
+      2
     </div>
   </a>
   <a class="sidebar-state-tag" href="/tags/" aria-label="sidebar-state-tag-link">
     <div>Tags</div>
-    <div class="sidebar-state-number">4</div>
+    <div class="sidebar-state-number">7</div>
   </a>
 </div>
 <div class="sidebar-social"></div>
@@ -262,7 +262,304 @@ This article does not have a corresponding language version
 </h2><ol>
 <li><strong>虚函数表（VTable）</strong>：类级别，所有同类对象共享同一张虚表，存储虚函数地址；</li>
 <li><strong>虚表指针（vptr）</strong>：对象级别，每个对象都拥有，指向所属类的虚表。</li>
-</ol></div>
+</ol>
+<h1 id="二虚表的生成与存储">
+<a class="header-anchor" href="#%e4%ba%8c%e8%99%9a%e8%a1%a8%e7%9a%84%e7%94%9f%e6%88%90%e4%b8%8e%e5%ad%98%e5%82%a8"></a>
+二、虚表的生成与存储
+</h1><p>虚表在编译期由编译器完整生成，通常放置在只读数据段（如 Linux 下的 .rodata），因此程序运行期间不会被意外修改。对于含有虚函数的类 C，编译器会：</p>
+<ul>
+<li>为 C 创建一张虚表，表中按虚函数声明顺序（考虑继承）依次存放各虚函数的入口地址。</li>
+<li>在 C 的对象布局中隐式插入一个 vptr（在多数实现中位于对象的起始位置），该指针会在对象构造时被正确初始化，指向 C 的虚表。
+示例代码：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;iostream&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">class Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void f() { std::cout &lt;&lt; &#34;Base::f&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void g() { std::cout &lt;&lt; &#34;Base::g&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">// 辅助函数：打印对象前8字节（即vptr的值，64位系统）</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">void print_vptr(void* obj) {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 对象起始地址存放的就是vptr</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">uintptr_t* vptr = reinterpret_cast&lt;uintptr_t*&gt;(obj);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">std::cout &lt;&lt; &#34;vptr: 0x&#34; &lt;&lt; std::hex &lt;&lt; *vptr &lt;&lt; std::dec &lt;&lt; std::endl;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">int main() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Base b1, b2;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">print_vptr(&amp;b1);  // b1的vptr</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">print_vptr(&amp;b2);  // b2的vptr，应当与b1相同（指向同一张Base虚表）</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>运行结果（不同地址仅作示例）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">vptr</span><span class="p">:</span><span class="w"> </span><span class="m">0x55d4a3e0bd38</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vptr</span><span class="p">:</span><span class="w"> </span><span class="m">0x55d4a3e0bd38</span><span class="w">
+</span></span></span></code></pre></div><p>可见，所有 Base 对象共享同一个虚表地址。</p>
+<h1 id="三构造与析构过程中的-vptr">
+<a class="header-anchor" href="#%e4%b8%89%e6%9e%84%e9%80%a0%e4%b8%8e%e6%9e%90%e6%9e%84%e8%bf%87%e7%a8%8b%e4%b8%ad%e7%9a%84-vptr"></a>
+三、构造与析构过程中的 vptr
+</h1><p>虚表指针在构造和析构函数中会随着继承链条逐步切换，以保证在基类构造函数中调用的虚函数不会意外落入尚未初始化完全的派生类版本。
+<strong>构造阶段</strong>：先调用基类构造函数。进入基类构造函数体之前，对象的 vptr 会被设置为该基类的虚表；基类构造完毕后，再沿继承层次向下，依次更新 vptr 为各个派生类的虚表，直到最终类构造函数执行完成。因此，在构造函数中调用虚函数不具备多态行为，只会调用当前构造层次对应的版本。
+<strong>析构阶段</strong>：过程与构造相反，从最终析构函数开始，vptr 逐级向基类回退，确保在析构函数中调用虚函数不会访问已销毁的派生类资源。
+示例代码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;iostream&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">class Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Base() { </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">std::cout &lt;&lt; &#34;Base::Base() -&gt; &#34;; </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">show();  // 构造中调用虚函数</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual ~Base() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">std::cout &lt;&lt; &#34;Base::~Base() -&gt; &#34;;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">show();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void show() { std::cout &lt;&lt; &#34;Base::show&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived </span><span class="p">:</span><span class="w"> </span><span class="l">public Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Derived() { </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">std::cout &lt;&lt; &#34;Derived::Derived() -&gt; &#34;; </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">show(); </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">~Derived() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">std::cout &lt;&lt; &#34;Derived::~Derived() -&gt; &#34;;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">show();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void show() override { std::cout &lt;&lt; &#34;Derived::show&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">int main() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Derived d;  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 输出将展示构造函数中虚函数没有多态行为</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>输出示例：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">Base::Base() -&gt; Base::show</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Derived::Derived() -&gt; Derived::show</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Derived::~Derived() -&gt; Derived::show</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Base::~Base() -&gt; Base::show</span><span class="w">
+</span></span></span></code></pre></div><p>在 Base 构造函数内，虽然对象最终是 Derived 类型，但此时 vptr 仍指向 Base 的虚表，因此调用的是 Base::show。析构过程对称，Base 析构时 vptr 已回退到 Base 虚表。</p>
+<h1 id="四单继承中的虚表布局">
+<a class="header-anchor" href="#%e5%9b%9b%e5%8d%95%e7%bb%a7%e6%89%bf%e4%b8%ad%e7%9a%84%e8%99%9a%e8%a1%a8%e5%b8%83%e5%b1%80"></a>
+四、单继承中的虚表布局
+</h1><p>单继承体系下，派生类会“拷贝”一份基类的虚表结构，并用自身的重写版本替换对应的函数地址。如果派生类新增了虚函数，这些新函数的地址会被依次追加在虚表末尾。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">class Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void f() { std::cout &lt;&lt; &#34;Base::f&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void g() { std::cout &lt;&lt; &#34;Base::g&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived </span><span class="p">:</span><span class="w"> </span><span class="l">public Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void f() override { std::cout &lt;&lt; &#34;Derived::f&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void h() { std::cout &lt;&lt; &#34;Derived::h&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span></code></pre></div><p>可以通过模拟虚表结构来观察布局：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">void inspect_vtable() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">using FuncPtr = void(*)();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Derived d;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">uintptr_t* vptr = reinterpret_cast&lt;uintptr_t*&gt;(&amp;d);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">uintptr_t* vtable = reinterpret_cast&lt;uintptr_t*&gt;(*vptr);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 假设虚表第一个条目是type_info指针（见后文RTTI），我们跳过它</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 在Itanium ABI下，虚函数从vtable[0]或vtable[1]开始取决于实现，此处直接展示地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">FuncPtr* funcs = reinterpret_cast&lt;FuncPtr*&gt;(vtable + 1); // 可能需要调整偏移</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">std::cout &lt;&lt; &#34;Derived vtable:&#34; &lt;&lt; std::endl;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">for (int i = 0; i &lt; 3; ++i) {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">printf(&#34;  [%d]: %p\n&#34;, i, funcs[i]);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>典型输出中，funcs[0] 是 Derived::f，funcs[1] 是 Base::g，funcs[2] 是 Derived::h，验证了覆盖与追加的布局规则。
+当执行 Base* ptr = new Derived(); ptr-&gt;f(); 时，运行时：</p>
+<ul>
+<li>通过 ptr 取得 vptr；</li>
+<li>在编译期已知 f 在虚表中的索引（此处为0），直接按偏移量取出函数指针并调用。</li>
+</ul>
+<h1 id="五多重继承下的虚表与-this-调整">
+<a class="header-anchor" href="#%e4%ba%94%e5%a4%9a%e9%87%8d%e7%bb%a7%e6%89%bf%e4%b8%8b%e7%9a%84%e8%99%9a%e8%a1%a8%e4%b8%8e-this-%e8%b0%83%e6%95%b4"></a>
+五、多重继承下的虚表与 this 调整
+</h1><p>当派生类同时继承多个含有虚函数的基类时，对象内部将包含多个 vptr，分别指向不同基类子对象对应的虚表。
+以如下代码为例：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">class Base1 {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void f() { std::cout &lt;&lt; &#34;Base1::f&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">class Base2 {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void g() { std::cout &lt;&lt; &#34;Base2::g&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived </span><span class="p">:</span><span class="w"> </span><span class="l">public Base1, public Base2 {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void f() override { std::cout &lt;&lt; &#34;Derived::f&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void g() override { std::cout &lt;&lt; &#34;Derived::g&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void h() { std::cout &lt;&lt; &#34;Derived::h&#34; &lt;&lt; std::endl; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span></code></pre></div><p>对象内存布局（64位）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">Derived</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">vptr1 (Base1子对象) -&gt; 主虚表</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">Base1 成员（如果有）</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">vptr2 (Base2子对象) -&gt; 次虚表</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">Base2 成员（如果有）</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">Derived 自身成员</span><span class="w">
+</span></span></span></code></pre></div><p>验证双重vptr和this调整的thunk：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">void demonstrate_thunk() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Derived d;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Base2* p2 = &amp;d;  // p2 指向Derived内部的Base2子对象</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 打印 p2 的地址与 d 的地址，观察偏移</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">printf(&#34;Address of d:   %p\n&#34;, &amp;d);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">printf(&#34;Address of p2:  %p\n&#34;, p2);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 差值应为 sizeof(Base1)（若有成员变量）</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>输出（假设无成员变量，仅vptr，64位下可能差8字节）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">Address of d</span><span class="p">:</span><span class="w">   </span><span class="m">0x7ffee5c3a0b8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">Address of p2</span><span class="p">:</span><span class="w">  </span><span class="m">0x7ffee5c3a0c0</span><span class="w">   </span><span class="l">(相差8字节，即vptr1的大小)</span><span class="w">
+</span></span></span></code></pre></div><p>当调用 p2-&gt;g(); 时，g 在次虚表中的条目实际不是直接指向 Derived::g，而是一个 thunk，它会将 this 减去适当偏移，再跳转到 Derived::g 的实现。可以通过查看虚表中函数指针的地址（通常与普通成员函数地址不同）来感知 thunk 的存在，但具体细节依赖编译器 ABI。</p>
+<h1 id="六虚继承与虚表">
+<a class="header-anchor" href="#%e5%85%ad%e8%99%9a%e7%bb%a7%e6%89%bf%e4%b8%8e%e8%99%9a%e8%a1%a8"></a>
+六、虚继承与虚表
+</h1><p>虚继承用于解决菱形继承问题，其底层往往借助额外的虚基类表或虚表中的负偏移条目来定位虚基类子对象。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">class Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">int data;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void f() {}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived1 </span><span class="p">:</span><span class="w"> </span><span class="l">virtual public Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void f() override {}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived2 </span><span class="p">:</span><span class="w"> </span><span class="l">virtual public Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void f() override {}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Final </span><span class="p">:</span><span class="w"> </span><span class="l">public Derived1, public Derived2 {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void f() override {}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span></code></pre></div><p>在典型的虚继承布局下，Final 对象中会同时包含 Derived1 和 Derived2 的子对象，但它们共享同一个 Base 子对象。每个虚派生类（Derived1、Derived2）的虚表或单独的表（如 vbtable）会存储一个偏移量，用于在运行时找到 Base 的位置。可以通过打印对象地址和基类指针的转换来验证：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">Final obj;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Base* pb = &amp;obj;  // pb 自动指向唯一的Base子对象</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Derived1* pd1 = &amp;obj;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Derived2* pd2 = &amp;obj;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">printf(&#34;Final object: %p\n&#34;, &amp;obj);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">printf(&#34;Derived1*:     %p\n&#34;, pd1);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">printf(&#34;Derived2*:     %p\n&#34;, pd2);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">printf(&#34;Base*:         %p\n&#34;, pb);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">// 地址各不相同，展示了虚继承的复杂布局</span><span class="w">
+</span></span></span></code></pre></div><p>输出示例（地址示意）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">Final object</span><span class="p">:</span><span class="w"> </span><span class="m">0x7ffc108b0a10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">Derived1*</span><span class="p">:</span><span class="w">     </span><span class="m">0x7ffc108b0a10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">Derived2*</span><span class="p">:</span><span class="w">     </span><span class="m">0x7ffc108b0a20</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">Base*</span><span class="p">:</span><span class="w">         </span><span class="m">0x7ffc108b0a30</span><span class="w">
+</span></span></span></code></pre></div><p>Base 子对象在对象尾部的现象，体现了通过虚表间接定位虚基类的机制。</p>
+<h1 id="七虚表与运行时类型识别rtti">
+<a class="header-anchor" href="#%e4%b8%83%e8%99%9a%e8%a1%a8%e4%b8%8e%e8%bf%90%e8%a1%8c%e6%97%b6%e7%b1%bb%e5%9e%8b%e8%af%86%e5%88%abrtti"></a>
+七、虚表与运行时类型识别（RTTI）
+</h1><p>在主流 C++ ABI 中，虚表第一个函数条目之前（如 vtable[-1]）通常存放着 type_info 对象的指针，供 dynamic_cast 和 typeid 使用。
+演示 typeid 和 dynamic_cast 的工作：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;typeinfo&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;iostream&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">class Base {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual ~Base() {} // 必须有虚函数才有RTTI</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Derived </span><span class="p">:</span><span class="w"> </span><span class="l">public Base {};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">int main() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Base* pb = new Derived();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// typeid 返回多态对象的动态类型</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">std::cout &lt;&lt; typeid(*pb).name() &lt;&lt; std::endl; // 可能输出 &#34;7Derived&#34; (gcc)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// dynamic_cast 安全向下转型</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Derived* pd = dynamic_cast&lt;Derived*&gt;(pb);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">if (pd) {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">std::cout &lt;&lt; &#34;dynamic_cast succeeded&#34; &lt;&lt; std::endl;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 非多态类型无法 dynamic_cast</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// class NonPoly {}; NonPoly* np = new NonPoly;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// dynamic_cast&lt;...&gt;(np); // 编译错误</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">delete pb;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>运行时，dynamic_cast 通过 vptr 找到虚表，再访问 type_info，与目标类型比对来实现安全检查。</p>
+<h1 id="八虚函数调用的底层细节与性能">
+<a class="header-anchor" href="#%e5%85%ab%e8%99%9a%e5%87%bd%e6%95%b0%e8%b0%83%e7%94%a8%e7%9a%84%e5%ba%95%e5%b1%82%e7%bb%86%e8%8a%82%e4%b8%8e%e6%80%a7%e8%83%bd"></a>
+八、虚函数调用的底层细节与性能
+</h1><p>调用 ptr-&gt;func() 通常需要：
+读取 ptr 指向对象的 vptr（一次内存访问）。
+在虚表中按已知索引获取函数地址（第二次内存访问）。
+间接调用该函数。
+与直接调用相比，多了两次解引用，且编译器通常无法内联。可以通过简单测试感知开销：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="c">#include &lt;chrono&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#include &lt;iostream&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">class Interface {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual int call() = 0;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Impl </span><span class="p">:</span><span class="w"> </span><span class="l">public Interface {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">int call() override { return 42; }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">void direct_call() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Impl obj;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">volatile int x;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">for (int i = 0; i &lt; 100000000; ++i) {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">x = obj.call(); // 可能被内联优化</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">void virtual_call() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Interface* obj = new Impl();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">volatile int x;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">for (int i = 0; i &lt; 100000000; ++i) {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">x = obj-&gt;call(); // 虚调用</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">delete obj;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">// 运行比较时间，直接调用通常更快</span><span class="w">
+</span></span></span></code></pre></div><p>现代编译器在能静态推导出对象具体类型时，会进行“去虚化”，将虚调用转为直接调用。但在无法推导的场景（如通过外部传递的指针），开销仍存。</p>
+<h1 id="九安全性考量与常见误区">
+<a class="header-anchor" href="#%e4%b9%9d%e5%ae%89%e5%85%a8%e6%80%a7%e8%80%83%e9%87%8f%e4%b8%8e%e5%b8%b8%e8%a7%81%e8%af%af%e5%8c%ba"></a>
+九、安全性考量与常见误区
+</h1><p><strong>vptr 被破坏</strong>：若对象发生缓冲区溢出，vptr 可能被篡改，导致调用虚函数时跳转到任意地址。
+<strong>纯虚函数调用</strong>：构造或析构中间接调用纯虚函数会导致程序终止。
+示例：模拟纯虚函数调用错误：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="l">class Abstract {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Abstract() { /* 不小心调用了纯虚函数 */ }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">virtual void pure() = 0;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void call_pure() { pure(); }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">class Concrete </span><span class="p">:</span><span class="w"> </span><span class="l">public Abstract {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">public</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">void pure() override {}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="l">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">int main() {</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">Concrete c; // 若Abstract构造函数中调用了call_pure，会崩溃</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// 下面演示析构时风险：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// Abstract* pa = new Concrete;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="l">// delete pa; // 抽象基类析构函数若调用纯虚函数同样危险</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>}<span class="w">
+</span></span></span></code></pre></div><p>正确的设计应避免在构造/析构中调用虚函数，尤其是纯虚函数。</p>
+<h1 id="十总结">
+<a class="header-anchor" href="#%e5%8d%81%e6%80%bb%e7%bb%93"></a>
+十、总结
+</h1><p>虚表是 C++ 多态的灵魂，它将接口与实现分离，在保持零成本抽象（仅在使用虚函数时才引入开销）的前提下，为大规模面向对象设计提供了坚实的底层支撑。理解虚表在单继承、多继承、虚继承中的布局变化，以及构造/析构期间 vptr 的动态切换，不仅有助于编写更高效、更安全的 C++ 代码，也有助于从根本上排查那些与多态相关的诡异运行时问题。</p></div>
     <footer class="article-footer"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item" data-aos="zoom-in">
       <a
         class="article-tag-list-link"
@@ -302,6 +599,18 @@ This article does not have a corresponding language version
         ></a>
         <div class="article-nav-caption">Prev</div>
         <h3 class="article-nav-title">C&#43;&#43;的妙妙赋值法</h3>
+      </div><div class="article-nav-link-wrap right"><img
+            data-src="/cover/4.webp"
+            data-sizes="auto"
+            alt="腾讯安全技术竞赛2026初赛"
+            class="lazyload"
+          /><a
+          href="/post/%E8%85%BE%E8%AE%AF%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B2026%E5%88%9D%E8%B5%9B/"
+          aria-label="Next:腾讯安全技术竞赛2026初赛"
+          title="Next:腾讯安全技术竞赛2026初赛"
+        ></a>
+        <div class="article-nav-caption">Next</div>
+        <h3 class="article-nav-title">腾讯安全技术竞赛2026初赛</h3>
       </div></nav></article></section>
         </div><footer id="footer" aria-label="Site footer">
   <div style="width: 100%; overflow: hidden">
@@ -324,10 +633,10 @@ This article does not have a corresponding language version
         >
       </div><div>
         <span class="icon-brush"
-          >&nbsp;227</span
+          >&nbsp;1.1k</span
         >
         &nbsp;|&nbsp;
-        <span class="icon-coffee">&nbsp;00:04</span>
+        <span class="icon-coffee">&nbsp;00:09</span>
       </div><div>
         <span class="icon-eye"></span>
         <span id="busuanzi_container_site_pv"
@@ -370,17 +679,17 @@ This article does not have a corresponding language version
 </div>
 <div class="sidebar-state">
   <div class="sidebar-state-article">
-    <div>Posts</div><div class="sidebar-state-number">4</div>
+    <div>Posts</div><div class="sidebar-state-number">5</div>
   </div>
   <a class="sidebar-state-category" href="/categories/" aria-label="sidebar-state-category-link">
     <div>Categories</div>
     <div class="sidebar-state-number">
-      1
+      2
     </div>
   </a>
   <a class="sidebar-state-tag" href="/tags/" aria-label="sidebar-state-tag-link">
     <div>Tags</div>
-    <div class="sidebar-state-number">4</div>
+    <div class="sidebar-state-number">7</div>
   </a>
 </div>
 <div class="sidebar-social"></div>
